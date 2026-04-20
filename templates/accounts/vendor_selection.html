@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><title>Select Vendors</title></head>
+<body>
+    <h2>Select Vendors to Track</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% for vendor in all_vendors %}
+            <div>
+                <input
+                    type="checkbox"
+                    name="vendors"
+                    value="{{ vendor.id }}" #send vendor.id when submitted
+                    {% if vendor in user_vendors %}checked{% endif %} #adds check if the user is already following
+                >
+                {{ vendor.name }}
+            </div>
+        {% endfor %}
+        <br>
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'dashboard' %}">Back to Dashboard</a>
+</body>
+</html>

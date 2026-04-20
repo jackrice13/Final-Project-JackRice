@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-
+from django.contrib.auth.decorators import login_required
+from core.models import Vendor
 
 def register(request):  #register new users
     if request.method == 'POST':
@@ -30,3 +31,19 @@ def login_view(request):    #basic login
 def logout_view(request): #basic logout
     logout(request)
     return redirect('login')
+
+
+@login_required
+def vendor_selection(request): #vendor selector for user profile
+    profile = request.user.userprofile
+    all_vendors = Vendor.objects.all()
+
+    if request.method == 'POST':
+        selected_vendors = request.POST.getlist('vendors')
+        profile.vendors.set(selected_vendors)
+        return redirect('dashboard')
+
+    return render(request, 'accounts/vendor_selection.html', {
+        'all_vendors': all_vendors,
+        'user_vendors': profile.vendors.all()
+    })
