@@ -3,6 +3,7 @@ from core.models import Vulnerability, Vendor, Software
 import requests
 from datetime import datetime, timedelta
 
+#uses MSRC to find product updates from Microsoft and adds products to the software table and attempts to match it to CVEs in Vuln table.
 
 # Mapping of MSRC product name keywords to simple names
 PRODUCT_MAP = {
@@ -85,10 +86,10 @@ class Command(BaseCommand):
             data = response.json() # Response collector
 
             # Get the list of affected products for this month
-            product_tree = data.get('ProductTree', {})
-            full_product_names = product_tree.get('FullProductName', [])
+            product_tree = data.get('ProductTree', {})  #list of all products with their IDs and full names
+            full_product_names = product_tree.get('FullProductName', []) #full name
 
-            # Build a lookup dict of product ID to simple name
+            # lookup dict of product ID to simple name
             product_lookup = {}
             for product in full_product_names:
                 product_id = product.get('ProductID')
@@ -106,9 +107,9 @@ class Command(BaseCommand):
                 if not cve_id:
                     continue
 
-                # Find matching CVE in our database
+                # match CVE to database
                 try:
-                    vuln = Vulnerability.objects.get(cve_id=cve_id)
+                    vuln = Vulnerability.objects.get(cve_id=cve_id) #looks for cve
                 except Vulnerability.DoesNotExist:
                     total_not_found += 1
                     continue
@@ -118,26 +119,26 @@ class Command(BaseCommand):
                 for threat in item.get('Threats', []):
                     product_id = threat.get('ProductID', '')
 
-                    # MSRC sometimes returns ProductID as a list, handle both cases
+                    # fixes weirdness when data returns a list, instead of string
                     if isinstance(product_id, list):
                         for pid in product_id:
                             if pid in product_lookup:
                                 affected_products.add(product_lookup[pid])
                     else:
                         if product_id in product_lookup:
-                            affected_products.add(product_lookup[product_id])
+                            affected_products.add(product_lookup[product_id]) #translates the product ID to a simple name using our lookup
 
                 # Create software entries and link to vulnerability
                 for simple_name in affected_products:
-                    software, _ = Software.objects.get_or_create(
+                    software, _ = Software.objects.get_or_create( #finds or creates the Software entry.
                         name=simple_name,
                         vendor=vendor,
                     )
-                    vuln.software.add(software)
+                    vuln.software.add(software) #adds the software to the vulnerability
 
                 total_linked += 1
 
         self.stdout.write(self.style.SUCCESS(
-            f'Done! Linked {total_linked} CVEs to Microsoft software. '
+            f'Linked {total_linked} CVEs to Microsoft software. '
             f'{total_not_found} CVEs not in local database.'
         ))
