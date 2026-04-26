@@ -3,7 +3,7 @@ from core.models import Vulnerability, Vendor, Software
 import requests
 from datetime import datetime, timedelta
 
-#uses MSRC to find product updates from Microsoft and adds products to the software table and attempts to match it to CVEs in Vuln table.
+#uses MSRC to find product updates from Microsoft and adds products to the software table and attempts to match it to CVEs in Vuln table. Should allow user to track a software product
 
 # Mapping of MSRC product name keywords to simple names
 PRODUCT_MAP = {
