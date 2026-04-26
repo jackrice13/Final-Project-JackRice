@@ -7,6 +7,7 @@ from datetime import datetime
 
 # Maps endoflife.date product names to what we have in our database
 PRODUCT_MAP = { # key and value to setup tuple of name and vendor
+    # Microsoft
     'windows': ('Windows', 'microsoft'),
     'windows-server': ('Windows Server', 'microsoft'),
     'msexchange': ('Microsoft Exchange', 'microsoft'),
@@ -17,6 +18,21 @@ PRODUCT_MAP = { # key and value to setup tuple of name and vendor
     'dotnet': ('.NET', 'microsoft'),
     'mssqlserver': ('Microsoft SQL Server', 'microsoft'),
     'powershell': ('PowerShell', 'microsoft'),
+
+    # Linux vendors
+    'ubuntu': ('Ubuntu', 'canonical'),
+    'debian': ('Debian', 'debian'),
+    'rhel': ('Red Hat Enterprise Linux', 'red-hat'),
+    'centos': ('CentOS', 'centos'),
+    'fedora': ('Fedora', 'fedora'),
+
+    # Other vendors
+    'nginx': ('NGINX', 'nginx'),
+    'postgresql': ('PostgreSQL', 'postgresql'),
+    'mysql': ('MySQL', 'oracle'),
+    'nodejs': ('Node.js', 'nodejs'),
+    'python': ('Python', 'python'),
+    'django': ('Django', 'django'),
 }
 
 

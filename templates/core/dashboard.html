@@ -1,10 +1,194 @@
-<!DOCTYPE html>
-<html>
-<head><title>Dashboard</title></head>
-<body>
-    <h2>Welcome, {{ request.user.username }}!</h2>
-    <p>Your vulnerability dashboard will appear here.</p>
-    <a href="{% url 'vendor_selection' %}">Manage Vendors</a> |
-    <a href="{% url 'logout' %}">Logout</a>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - VulnTracker{% endblock %}
+
+{% block content %}
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card total p-3">
+            <div class="stat-label">Total CVEs</div>
+            <div class="stat-number text-primary">{{ total_count }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card critical p-3">
+            <div class="stat-label">Critical</div>
+            <div class="stat-number text-danger">{{ critical_count }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card high p-3">
+            <div class="stat-label">High</div>
+            <div class="stat-number" style="color: #e67e22;">{{ high_count }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card kev p-3">
+            <div class="stat-label">Active Exploits</div>
+            <div class="stat-number" style="color: #8e44ad;">{{ kev_count }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card filter-card p-3 mb-4">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Vendor</label>
+            <select name="vendor" class="form-select">
+                <option value="">All Vendors</option>
+                {% for vendor in user_vendors %}
+                    <option value="{{ vendor.id }}"
+                        {% if vendor_filter == vendor.id|stringformat:"s" %}selected{% endif %}>
+                        {{ vendor.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Severity</label>
+            <select name="severity" class="form-select">
+                <option value="">All Severities</option>
+                {% for severity in severity_choices %}
+                    <option value="{{ severity }}"
+                        {% if severity_filter == severity %}selected{% endif %}>
+                        {{ severity }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label fw-semibold">Active Exploits</label>
+            <select name="kev" class="form-select">
+                <option value="">All</option>
+                <option value="true" {% if kev_filter == 'true' %}selected{% endif %}>
+                    KEV Only
+                </option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn w-100"
+                style="background: linear-gradient(135deg, #1a1f5e, #2d3561); color: white;">
+                Apply Filters
+            </button>
+        </div>
+        <div class="col-md-2">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary w-100">
+                Clear
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Vulnerability Table -->
+<div class="card vuln-table mb-4">
+    <table class="table table-hover mb-0">
+        <thead>
+            <tr>
+                <th class="col-cve">CVE ID</th>
+                <th class="col-severity">Severity</th>
+                <th class="col-score">CVSS Score</th>
+                <th class="col-software">Affected Software</th>
+                <th class="col-published">Published</th>
+                <th class="col-kev">Active Exploit</th>
+                <th class="col-actions">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for vuln in page_obj %}
+            <tr>
+                <td>
+                    <a href="{% url 'vulnerability_detail' vuln.cve_id %}" class="cve-link">
+                        {{ vuln.cve_id }}
+                    </a>
+                </td>
+                <td>
+                    <span class="severity-{{ vuln.severity|lower }}">
+                        {{ vuln.severity }}
+                    </span>
+                </td>
+                <td>
+                    {% if vuln.cvss_score %}
+                        <strong>{{ vuln.cvss_score }}</strong>
+                    {% else %}
+                        <span class="text-muted">N/A</span>
+                    {% endif %}
+                </td>
+               <td class="col-software">
+                    <div class="software-badges">
+                        {% for software in vuln.software.all %}
+                            <span class="badge bg-light text-dark border me-1">
+                                {{ software.vendor.name }} — {{ software.name }}
+                            </span>
+                        {% empty %}
+                            <span class="text-muted">—</span>
+                        {% endfor %}
+                    </div>
+                </td>
+                <td>
+                    {% if vuln.published_date %}
+                        {{ vuln.published_date }}
+                    {% else %}
+                        <span class="text-muted">Unknown</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if vuln.in_cisa_kev %}
+                        <span class="kev-badge">⚠️ Active</span>
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'vulnerability_detail' vuln.cve_id %}"
+                       class="btn btn-sm btn-outline-primary">
+                        Details
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center py-4 text-muted">
+                    No vulnerabilities found. Try selecting vendors in
+                    <a href="{% url 'vendor_selection' %}">Manage Vendors</a>.
+                </td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" 
+                   href="?page={{ page_obj.previous_page_number }}&severity={{ severity_filter }}&vendor={{ vendor_filter }}">
+                    Previous
+                </a>
+            </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" 
+                   href="?page={{ page_obj.next_page_number }}&severity={{ severity_filter }}&vendor={{ vendor_filter }}">
+                    Next
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}
