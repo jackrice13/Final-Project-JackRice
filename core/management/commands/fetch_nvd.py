@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 
 class Command(BaseCommand):
-    help = 'Fetches vulnerabilities from the NVD API'
+
 
     def add_arguments(self, parser):  # adds the ability to limit the number of days to check
         parser.add_argument(

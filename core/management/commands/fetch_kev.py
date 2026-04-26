@@ -4,7 +4,6 @@ import requests
 
 
 class Command(BaseCommand):
-    help = 'Fetches CISA Known Exploited Vulnerabilities and enriches local CVE data'
 
     def handle(self, *args, **kwargs):
         self.stdout.write('Starting CISA KEV fetch...') #output
