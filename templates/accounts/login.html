@@ -6,7 +6,18 @@
             <h2 class="fw-bold mb-4" style="color: #1a1f5e;">Login</h2>
             <form method="post">
                 {% csrf_token %}
-                {{ form.as_p }}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ field.label }}</label>
+                        <input type="{{ field.field.widget.input_type }}"
+                               name="{{ field.html_name }}"
+                               class="form-control {% if field.errors %}is-invalid{% endif %}"
+                               placeholder="{{ field.label }}">
+                        {% if field.errors %}
+                            <div class="invalid-feedback">{{ field.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
                 <button type="submit" class="btn w-100 mt-2"
                     style="background: linear-gradient(135deg, #1a1f5e, #2d3561); color: white;">
                     Login

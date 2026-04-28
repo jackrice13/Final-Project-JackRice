@@ -44,7 +44,7 @@
             <span class="navbar-brand fw-bold fs-4">🛡️ VulnTracker</span>
             <div class="d-flex align-items-center gap-3">
                 <span class="text-white">Welcome, {{ request.user.username }}</span>
-                <a href="{% url 'vendor_selection' %}" class="btn btn-outline-light btn-sm">Manage Vendors</a>
+                <a href="{% url 'profile' %}" class="btn btn-outline-light btn-sm">My Profile</a>
                 <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Logout</a>
             </div>
         </div>
