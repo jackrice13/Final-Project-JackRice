@@ -89,7 +89,8 @@
                 <th class="col-cve">CVE ID</th>
                 <th class="col-severity">Severity</th>
                 <th class="col-score">CVSS Score</th>
-                <th class="col-software">Affected Software</th>
+                <th class="col-software">Vendor</th>
+                <th class="col-software">Software</th>
                 <th class="col-published">Published</th>
                 <th class="col-kev">Active Exploit</th>
                 <th class="col-actions">Actions</th>
@@ -119,7 +120,19 @@
                     <div class="software-badges">
                         {% for software in vuln.software.all %}
                             <span class="badge bg-light text-dark border me-1">
-                                {{ software.vendor.name }} — {{ software.name }}
+                             {{ software.vendor.name }} <!--  {{ software.name }}-->
+                            </span>
+                        {% empty %}
+                            <span class="text-muted">—</span>
+                        {% endfor %}
+                    </div>
+                </td>
+                </td>
+               <td class="col-software">
+                    <div class="software-badges">
+                        {% for software in vuln.software.all %}
+                            <span class="badge bg-light text-dark border me-1">
+                              {{ software.name }}
                             </span>
                         {% empty %}
                             <span class="text-muted">—</span>
