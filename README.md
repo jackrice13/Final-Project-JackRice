@@ -5,19 +5,19 @@
  
 # Project Title
  
-Simple overview of use/purpose.
- 
+### VulnTracker
+
+A user-curated vulnerability and software update tracking dashboard for endpoint engineers and software asset managers. 
 ## Description
  
-An in-depth paragraph about your project and overview of use.
- 
+VulnTracker is a Django-based web application that aggregates vulnerability and software update data from multiple public security APIs into a single, personalized dashboard. Rather than digging through massive amounts of security data that may not apply to their environment, users can create an account, select the software vendors they care about, and receive a filtered view of relevant CVEs sorted by criticality. 
 ## Getting Started
  
 ### Dependencies
  
-* Describe any prerequisites, libraries, OS version, etc., needed before installing program.
-* ex. Windows 10
-* List pip install instructions.
+django
+requests
+python-dotenv
  
 ### Installing
  
@@ -26,12 +26,14 @@ An in-depth paragraph about your project and overview of use.
  
 ### Executing program
  
-* How to run the program
-* Step-by-step bullets
+Start the development server:
 ```
-code blocks for commands
+python manage.py runserver
 ```
- 
+Open your browser and navigate to:
+```
+http://127.0.0.1:8000
+ ```
 ## Help
  
 Any advise for common problems or issues.
@@ -41,28 +43,17 @@ command to run if program contains helper info
  
 ## Authors
  
-Contributors names and contact info
- 
-ex. Dominique Pizzie  
-ex. [@DomPizzie](https://twitter.com/dompizzie)
+Jack Rice
  
 ## Version History
- 
-* 0.2
-    * Various bug fixes and optimizations
-    * See [commit change]() or See [release history]()
 * 0.1
     * Initial Release
- 
-## License
- 
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
- 
+
 ## Acknowledgments
- 
-Inspiration, code snippets, etc.
-* [awesome-readme](https://github.com/matiassingers/awesome-readme)
-* [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
-* [dbader](https://github.com/dbader/readme-template)
-* [zenorocha](https://gist.github.com/zenorocha/4526327)
-* [fvcproductions](https://gist.github.com/fvcproductions/1bfc2d4aecb01a834b46)
+
+* [NVD API Documentation](https://nvd.nist.gov/developers/vulnerabilities)
+* [CISA Known Exploited Vulnerabilities Catalog](https://www.cisa.gov/known-exploited-vulnerabilities-catalog)
+* [Microsoft Security Response Center API](https://api.msrc.microsoft.com/cvrf/v2.0)
+* [endoflife.date API](https://endoflife.date/docs/api)
+* [Django Documentation](https://docs.djangoproject.com/)
+* [Bootstrap 5](https://getbootstrap.com/)
