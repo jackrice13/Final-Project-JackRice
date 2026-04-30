@@ -5,28 +5,40 @@
 {% block content %}
 <!-- Stat Cards -->
 <div class="row g-3 mb-4">
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card stat-card total p-3">
             <div class="stat-label">Total CVEs</div>
             <div class="stat-number text-primary">{{ total_count }}</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card stat-card critical p-3">
             <div class="stat-label">Critical</div>
             <div class="stat-number text-danger">{{ critical_count }}</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card stat-card high p-3">
             <div class="stat-label">High</div>
             <div class="stat-number" style="color: #e67e22;">{{ high_count }}</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card stat-card kev p-3">
             <div class="stat-label">Active Exploits</div>
             <div class="stat-number" style="color: #8e44ad;">{{ kev_count }}</div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card stat-card p-3" style="border-left: 4px solid #27ae60;">
+            <div class="stat-label">Remediated</div>
+            <div class="stat-number" style="color: #27ae60;">{{ remediated_count }}</div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card stat-card p-3" style="border-left: 4px solid #95a5a6;">
+            <div class="stat-label">Not Applicable</div>
+            <div class="stat-number" style="color: #95a5a6;">{{ na_count }}</div>
         </div>
     </div>
 </div>

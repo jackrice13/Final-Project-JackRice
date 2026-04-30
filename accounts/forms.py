@@ -13,8 +13,8 @@ class UserUpdateForm(forms.ModelForm):
 
 class VendorSelectionForm(forms.Form):
     vendors = forms.MultipleChoiceField( #allows user to pick multiple
-        required=False, #no selection required
-        widget=forms.CheckboxSelectMultiple #uses checkboxes instead of dropdown
+        required=False, # no selection required
+        widget=forms.CheckboxSelectMultiple # uses checkboxes instead of dropdown
     )
 
     def __init__(self, *args, vendor_queryset=None, **kwargs):

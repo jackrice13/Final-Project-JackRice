@@ -44,12 +44,17 @@ def dashboard(request):
         software__vendor__in=user_vendors
     ).distinct()
 
+    # Get user's remediation stats
+    user_statuses = VulnerabilityStatus.objects.filter(profile=profile)
+
     context = {
         'page_obj': page_obj,
         'total_count': all_vulns.count(),
         'critical_count': all_vulns.filter(severity='CRITICAL').count(),
         'high_count': all_vulns.filter(severity='HIGH').count(),
         'kev_count': all_vulns.filter(in_cisa_kev=True).count(),
+        'remediated_count': user_statuses.filter(status='REMEDIATED').count(),
+        'na_count': user_statuses.filter(status='NA').count(),
         'user_vendors': user_vendors,
         'severity_filter': severity_filter,
         'vendor_filter': vendor_filter,
