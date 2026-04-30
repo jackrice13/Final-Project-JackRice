@@ -12,7 +12,11 @@ STATUS_CHOICES = [
 class UserProfile(models.Model): #adds extension to built in auth_user
     user = models.OneToOneField(User, on_delete=models.CASCADE) # Creates accounts_userprofile, binds user to user_ID, allows
     vendors = models.ManyToManyField(Vendor, blank=True) # Creates accounts_userprofile_vendors, many to many allows use to track multiple vendors
-
+    # SLA thresholds (in days) for vulnerability remediation by severity
+    sla_critical = models.IntegerField(default=7) #days to remediate critical
+    sla_high = models.IntegerField(default=30) #days to remediate high
+    sla_medium = models.IntegerField(default=60) #days to remediate medium
+    sla_low = models.IntegerField(default=90) # days to remediate low
 
     def __str__(self):
         return f"{self.user.username}'s profile"

@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, Pass
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from core.models import Vendor
-from .forms import UserUpdateForm, VendorSelectionForm
+from .forms import UserUpdateForm, VendorSelectionForm, SLASettingsForm
 
 def register(request):  #register new users
     if request.method == 'POST':
@@ -50,17 +50,20 @@ def vendor_selection(request): #vendor selector for user profile
         'user_vendors': profile.vendors.all()
     })
 @login_required
+@login_required
+@login_required
 def profile(request):
     profile = request.user.userprofile
     all_vendors = Vendor.objects.all()
 
-    # Initialize all three forms
+    # Initialize all forms
     user_form = UserUpdateForm(instance=request.user)
     password_form = PasswordChangeForm(request.user)
     vendor_form = VendorSelectionForm(
         vendor_queryset=all_vendors,
         initial={'vendors': profile.vendors.values_list('id', flat=True)}
     )
+    sla_form = SLASettingsForm(instance=profile)  # ← added here
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -96,10 +99,19 @@ def profile(request):
                 messages.success(request, 'Vendor preferences saved.')
                 return redirect('profile')
 
+        # Handle SLA settings        ← added here
+        elif action == 'save_sla':
+            sla_form = SLASettingsForm(request.POST, instance=profile)
+            if sla_form.is_valid():
+                sla_form.save()
+                messages.success(request, 'SLA settings saved.')
+                return redirect('profile')
+
     context = {
         'user_form': user_form,
         'password_form': password_form,
         'vendor_form': vendor_form,
+        'sla_form': sla_form,          # ← added here
         'all_vendors': all_vendors,
         'user_vendors': profile.vendors.all(),
         'joined_date': request.user.date_joined,

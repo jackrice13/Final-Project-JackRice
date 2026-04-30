@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Aging Report - VulnTracker{% endblock %}
+
+{% block content %}
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h3 class="fw-bold" style="color: #1a1f5e;">Vulnerability Aging Report</h3>
+        <p class="text-muted">Open vulnerabilities tracked against your SLA targets</p>
+    </div>
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm">
+        ← Back to Dashboard
+    </a>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card p-3" style="border-left: 4px solid #1a1f5e;">
+            <div class="stat-label">Total Open</div>
+            <div class="stat-number text-primary">{{ total_open }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card p-3" style="border-left: 4px solid #e74c3c;">
+            <div class="stat-label">Overdue</div>
+            <div class="stat-number text-danger">{{ overdue_count }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card p-3" style="border-left: 4px solid #27ae60;">
+            <div class="stat-label">Within SLA</div>
+            <div class="stat-number" style="color: #27ae60;">{{ within_sla_count }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card p-3" style="border-left: 4px solid #4e73df;">
+            <div class="stat-label">SLA Targets</div>
+            <div class="small mt-1">
+                <span class="severity-critical">C</span> {{ profile.sla_critical }}d &nbsp;
+                <span class="severity-high">H</span> {{ profile.sla_high }}d &nbsp;
+                <span class="severity-medium">M</span> {{ profile.sla_medium }}d &nbsp;
+                <span class="severity-low">L</span> {{ profile.sla_low }}d
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Aging Table -->
+<div class="card vuln-table mb-4">
+    <table class="table table-hover mb-0">
+        <thead>
+            <tr>
+                <th>CVE ID</th>
+                <th>Severity</th>
+                <th>CVSS</th>
+                <th>Published</th>
+                <th>Age (Days)</th>
+                <th>SLA Target</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in page_obj %}
+            <tr class="{% if item.is_overdue %}table-danger{% endif %}">
+                <td>
+                    <a href="{% url 'vulnerability_detail' item.vuln.cve_id %}"
+                       class="cve-link">
+                        {{ item.vuln.cve_id }}
+                    </a>
+                </td>
+                <td>
+                    <span class="severity-{{ item.vuln.severity|lower }}">
+                        {{ item.vuln.severity }}
+                    </span>
+                </td>
+                <td>
+                    {% if item.vuln.cvss_score %}
+                        <strong>{{ item.vuln.cvss_score }}</strong>
+                    {% else %}
+                        <span class="text-muted">N/A</span>
+                    {% endif %}
+                </td>
+                <td>{{ item.vuln.published_date }}</td>
+                <td>
+                    <strong>{{ item.age_days }}</strong> days
+                </td>
+                <td>{{ item.sla_target }} days</td>
+                <td>
+                    {% if item.is_overdue %}
+                        <span class="badge bg-danger">
+                            ⚠️ Overdue by {{ item.days_overdue }} days
+                        </span>
+                    {% else %}
+                        <span class="badge bg-success">
+                            ✅ {{ item.days_remaining }} days left
+                        </span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'vulnerability_detail' item.vuln.cve_id %}"
+                       class="btn btn-sm btn-outline-primary">
+                        Details
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center py-4 text-muted">
+                    No open vulnerabilities found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                    Previous
+                </a>
+            </li>
+        {% endif %}
+        <li class="page-item disabled">
+            <span class="page-link">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                    Next
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

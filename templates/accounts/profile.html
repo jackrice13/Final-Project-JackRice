@@ -48,6 +48,66 @@
             </table>
         </div>
 
+                <!-- SLA Settings Card -->
+        <div class="card stat-card p-4 mt-4">
+            <h5 class="fw-bold mb-3" style="color: #1a1f5e;">SLA Targets</h5>
+            <p class="text-muted small mb-3">
+                Set the number of days within which each severity level should be remediated.
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="save_sla">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-danger">Critical</label>
+                    <div class="input-group">
+                        <input type="number"
+                               name="sla_critical"
+                               value="{{ sla_form.sla_critical.value }}"
+                               class="form-control"
+                               min="1">
+                        <span class="input-group-text">days</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" style="color: #e67e22;">High</label>
+                    <div class="input-group">
+                        <input type="number"
+                               name="sla_high"
+                               value="{{ sla_form.sla_high.value }}"
+                               class="form-control"
+                               min="1">
+                        <span class="input-group-text">days</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" style="color: #f39c12;">Medium</label>
+                    <div class="input-group">
+                        <input type="number"
+                               name="sla_medium"
+                               value="{{ sla_form.sla_medium.value }}"
+                               class="form-control"
+                               min="1">
+                        <span class="input-group-text">days</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" style="color: #27ae60;">Low</label>
+                    <div class="input-group">
+                        <input type="number"
+                               name="sla_low"
+                               value="{{ sla_form.sla_low.value }}"
+                               class="form-control"
+                               min="1">
+                        <span class="input-group-text">days</span>
+                    </div>
+                </div>
+                <button type="submit" class="btn w-100"
+                    style="background: linear-gradient(135deg, #1a1f5e, #2d3561); color: white;">
+                    Save SLA Settings
+                </button>
+            </form>
+        </div>
+
         <!-- Update Email Card -->
         <div class="card stat-card p-4 mb-4">
             <h5 class="fw-bold mb-3" style="color: #1a1f5e;">Update Email</h5>
@@ -150,5 +210,7 @@
     </div>
 
 </div>
+
+
 
 {% endblock %}

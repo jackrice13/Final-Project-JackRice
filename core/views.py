@@ -99,3 +99,72 @@ def update_status(request, cve_id):
         )
 
     return redirect('vulnerability_detail', cve_id=cve_id)
+
+from datetime import date
+
+@login_required
+def aging_report(request):
+    profile = request.user.userprofile
+    user_vendors = profile.vendors.all()
+    today = date.today()
+
+    # Get SLA settings from user profile
+    sla_map = {
+        'CRITICAL': profile.sla_critical,
+        'HIGH': profile.sla_high,
+        'MEDIUM': profile.sla_medium,
+        'LOW': profile.sla_low,
+        'UNKNOWN': profile.sla_low,  # treat unknown same as low
+    }
+
+    # Get all open vulnerabilities for user's vendors
+    open_vulns = Vulnerability.objects.filter(
+        software__vendor__in=user_vendors,
+    ).distinct().exclude(
+        # exclude ones the user has already remediated or marked NA
+        vulnerabilitystatus__profile=profile,
+        vulnerabilitystatus__status__in=['REMEDIATED', 'NA']
+    ).filter(
+        published_date__isnull=False  # must have a published date to calculate age
+    ).order_by('published_date')  # oldest first
+
+    # Calculate age and SLA status for each vulnerability
+    vuln_data = []
+    overdue_count = 0
+    within_sla_count = 0
+
+    for vuln in open_vulns:
+        age_days = (today - vuln.published_date).days
+        sla_target = sla_map.get(vuln.severity, profile.sla_low)
+        days_remaining = sla_target - age_days
+        is_overdue = age_days > sla_target
+
+        if is_overdue:
+            overdue_count += 1
+        else:
+            within_sla_count += 1
+
+        vuln_data.append({
+            'vuln': vuln,
+            'age_days': age_days,
+            'sla_target': sla_target,
+            'days_remaining': days_remaining,
+            'is_overdue': is_overdue,
+            'days_overdue': age_days - sla_target # calcs days overdue
+        })
+
+    # Pagination
+    paginator = Paginator(vuln_data, 25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'overdue_count': overdue_count,
+        'within_sla_count': within_sla_count,
+        'total_open': len(vuln_data),
+        'sla_map': sla_map,
+        'profile': profile,
+    }
+
+    return render(request, 'core/aging_report.html', context)
