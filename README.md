@@ -22,14 +22,23 @@ python-dotenv
 ### Installing
 #### Quick Setup (Recommended)
 
+Run Requirements.txt
+```
+pip install -r requirements.txt
+```
+Ran Migrations
+```
+python manage.py migrate
+```
 After installing dependencies and running migrations, seed the entire 
-database in one command:
+database:
 
 ```
 python manage.py setup_project
 ```
+
 This will load vendor data, create a demo user account, and fetch 
-vulnerability data from all configured APIs automatically.
+vulnerability data from all configured APIs.
 
 **Demo login credentials:**
 - Username: `demo`
@@ -37,7 +46,7 @@ vulnerability data from all configured APIs automatically.
 
 ### Optional: NVD API Key
 An NVD API key is not required but recommended for faster data fetching.
-Without a key the setup will still complete but may take longer.
+Without a key there is a limit to the API requests run against this API.
 Get a free key at https://nvd.nist.gov/developers/request-an-api-key
 
 If you have a key add it to your .env file:
@@ -57,8 +66,8 @@ http://127.0.0.1:8000
  ```
 ## Logins
 **SuperUser login credentials:**
--Username: 'admin'
--Password: 'Password01!'
+- Username: 'admin'
+- Password: 'Password01!'
 
 **Demo login credentials:**
 - Username: `demo`
