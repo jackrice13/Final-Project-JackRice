@@ -44,7 +44,7 @@ class Command(BaseCommand):
 
         days = kwargs['days'] #reads --days from above
         api_key = os.getenv('NVD_API_KEY') # gets apikey from .env
-        headers = {'apiKey': api_key} #builds API call headers
+        headers = {'apiKey': api_key} if api_key else {} #made api optional for easier portability
         base_url = 'https://services.nvd.nist.gov/rest/json/cves/2.0' # API endpoint
 
         end_date = datetime.now() #sets today as end_date
