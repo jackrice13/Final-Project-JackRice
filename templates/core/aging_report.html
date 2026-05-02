@@ -53,11 +53,26 @@
         <thead>
             <tr>
                 <th>CVE ID</th>
-                <th>Severity</th>
-                <th>CVSS</th>
-                <th>Risk Score</th>
-                <th>Published</th>
-                <th>Age (Days)</th>
+                <th class="sortable-header" data-sort="severity">
+                    Severity
+                    <span class="sort-icon">{% if current_field == 'severity' %}{% if direction == 'desc' %}▼{% else %}▲{% endif %}{% else %}<span style="opacity:0.4">▼</span>{% endif %}</span>
+                </th>
+                <th class="sortable-header" data-sort="cvss_score">
+                    CVSS
+                    <span class="sort-icon">{% if current_field == 'cvss_score' %}{% if direction == 'desc' %}▼{% else %}▲{% endif %}{% else %}<span style="opacity:0.4">▼</span>{% endif %}</span>
+                </th>
+                <th class="sortable-header" data-sort="risk_score">
+                    Risk Score
+                    <span class="sort-icon">{% if current_field == 'risk_score' %}{% if direction == 'desc' %}▼{% else %}▲{% endif %}{% else %}<span style="opacity:0.4">▼</span>{% endif %}</span>
+                </th>
+                <th class="sortable-header" data-sort="published_date">
+                    Published
+                    <span class="sort-icon">{% if current_field == 'published_date' %}{% if direction == 'desc' %}▼{% else %}▲{% endif %}{% else %}<span style="opacity:0.4">▼</span>{% endif %}</span>
+                </th>
+                <th class="sortable-header" data-sort="age_days">
+                    Age (Days)
+                    <span class="sort-icon">{% if current_field == 'age_days' %}{% if direction == 'desc' %}▼{% else %}▲{% endif %}{% else %}<span style="opacity:0.4">▼</span>{% endif %}</span>
+                </th>
                 <th>SLA Target</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -153,5 +168,22 @@
     </ul>
 </nav>
 {% endif %}
+<script>
+document.querySelectorAll('.sortable-header').forEach(function(th) {
+    th.addEventListener('click', function() {
+        const field = this.getAttribute('data-sort');
+        const currentSort = '{{ current_sort }}';
+        const currentField = '{{ current_field }}';
 
+        let newSort;
+        if (currentField === field && currentSort.startsWith('-')) {
+            newSort = field;
+        } else {
+            newSort = '-' + field;
+        }
+
+        window.location.href = '?sort=' + newSort;
+    });
+});
+</script>
 {% endblock %}

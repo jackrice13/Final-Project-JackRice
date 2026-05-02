@@ -96,19 +96,30 @@
 <!-- Vulnerability Table -->
 <div class="card vuln-table mb-4">
     <table class="table table-hover mb-0">
-        <thead>
-            <tr>
-                <th class="col-cve">CVE ID</th>
-                <th class="col-severity">Severity</th>
-                <th class="col-score">CVSS Score</th>
-                <th class="col-risk_score">Risk Score</th>
-                <th class="col-software">Vendor</th>
-                <th class="col-software">Software</th>
-                <th class="col-published">Published</th>
-                <th class="col-kev">Active Exploit</th>
-                <th class="col-actions">Actions</th>
-            </tr>
-        </thead>
+           <thead>
+                <tr>
+                    <th>CVE ID</th>
+                    <th class="sortable-header" data-sort="severity">
+                        Severity
+                        <span class="sort-icon">{% if current_field == 'severity' %}{% if direction == 'desc' %}▼{% else %}▲{% endif %}{% else %}<span style="opacity:0.4">▼</span>{% endif %}</span>
+                    </th>
+                    <th class="sortable-header" data-sort="cvss_score">
+                        CVSS Score
+                        <span class="sort-icon">{% if current_field == 'cvss_score' %}{% if direction == 'desc' %}▼{% else %}▲{% endif %}{% else %}<span style="opacity:0.4">▼</span>{% endif %}</span>
+                    </th>
+                    <th class="sortable-header" data-sort="risk_score">
+                        Risk Score
+                        <span class="sort-icon">{% if current_field == 'risk_score' %}{% if direction == 'desc' %}▼{% else %}▲{% endif %}{% else %}<span style="opacity:0.4">▼</span>{% endif %}</span>
+                    </th>
+                    <th>Affected Software</th>
+                    <th class="sortable-header" data-sort="published_date">
+                        Published
+                        <span class="sort-icon">{% if current_field == 'published_date' %}{% if direction == 'desc' %}▼{% else %}▲{% endif %}{% else %}<span style="opacity:0.4">▼</span>{% endif %}</span>
+                    </th>
+                    <th>Active Exploit</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
         <tbody>
             {% for item in vuln_data %}
             <tr>
@@ -213,5 +224,28 @@
     </ul>
 </nav>
 {% endif %}
+<script> // script to sort header columns
+document.querySelectorAll('.sortable-header').forEach(function(th) {
+    th.addEventListener('click', function() {
+        const field = this.getAttribute('data-sort');
+        const currentSort = '{{ current_sort }}';
+        const currentField = '{{ current_field }}';
+        const severityFilter = '{{ severity_filter }}';
+        const vendorFilter = '{{ vendor_filter }}';
+        const kevFilter = '{{ kev_filter }}';
 
+        let newSort;
+        if (currentField === field && currentSort.startsWith('-')) {
+            newSort = field;
+        } else {
+            newSort = '-' + field;
+        }
+
+        window.location.href = '?sort=' + newSort +
+            '&severity=' + severityFilter +
+            '&vendor=' + vendorFilter +
+            '&kev=' + kevFilter;
+    });
+});
+</script>
 {% endblock %}

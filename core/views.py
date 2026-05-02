@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from core.models import Vulnerability, Vendor
 from accounts.models import VulnerabilityStatus
-from datetime import date
+
 
 def calculate_risk_score(vuln):
     score = vuln.cvss_score or 0
@@ -24,6 +24,25 @@ def calculate_risk_score(vuln):
             break  # only add the bonus once even if multiple EOL software
 
     return round(score, 1)
+
+def get_sort_params(request, default='-cvss_score'):
+    sort = request.GET.get('sort', default)
+    # if sort starts with - it's descending, strip it to get the field name
+    if sort.startswith('-'):
+        current_field = sort[1:]
+        direction = 'desc'
+    else:
+        current_field = sort
+        direction = 'asc'
+    return sort, current_field, direction
+
+
+def get_next_sort(current_sort, field):
+    # if already sorting by this field, reverse direction
+    # otherwise sort descending by default
+    if current_sort == f'-{field}':
+        return field
+    return f'-{field}'
 
 @login_required
 def dashboard(request):
@@ -52,8 +71,28 @@ def dashboard(request):
     if kev_filter == 'true':
         vulnerabilities = vulnerabilities.filter(in_cisa_kev=True)
 
-    # Always sort by CVSS score highest first
-    vulnerabilities = vulnerabilities.order_by('-cvss_score')
+    # Get sort parameters
+    sort, current_field, direction = get_sort_params(request, '-cvss_score')
+
+    # Apply database level sorting for fields that exist on the model
+    db_sort_fields = {
+        'cvss_score': 'cvss_score',
+        'published_date': 'published_date',
+        'severity': 'severity',
+    }
+
+    if current_field in db_sort_fields:
+        if direction == 'desc':
+            vulnerabilities = vulnerabilities.order_by(
+                f'-{db_sort_fields[current_field]}'
+            )
+        else:
+            vulnerabilities = vulnerabilities.order_by(
+                db_sort_fields[current_field]
+            )
+    else:
+        # default sort
+        vulnerabilities = vulnerabilities.order_by('-cvss_score')
 
     # Pagination - 25 per page
     paginator = Paginator(vulnerabilities, 25)
@@ -67,6 +106,14 @@ def dashboard(request):
             'vuln': vuln,
             'risk_score': calculate_risk_score(vuln),
         })
+
+    # Sort by risk score in Python if selected
+    # (can't do this at DB level since it's calculated)
+    if current_field == 'risk_score':
+        vuln_data.sort(
+            key=lambda x: x['risk_score'],
+            reverse=(direction == 'desc')
+        )
 
     # Stats always based on full unfiltered queryset
     all_vulns = Vulnerability.objects.filter(
@@ -90,6 +137,9 @@ def dashboard(request):
         'vendor_filter': vendor_filter,
         'kev_filter': kev_filter,
         'severity_choices': ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'UNKNOWN'],
+        'current_sort': sort,
+        'current_field': current_field,
+        'direction': direction,
     }
 
     return render(request, 'core/dashboard.html', context)
@@ -101,18 +151,18 @@ def vulnerability_detail(request, cve_id):
     # Get user's status for this vulnerability if it exists
     user_status = None
     try:
-        from accounts.models import VulnerabilityStatus
         user_status = VulnerabilityStatus.objects.get(
             profile=request.user.userprofile,
             vulnerability=vuln
         )
-    except:
+    except VulnerabilityStatus.DoesNotExist:
         pass
 
     context = {
         'vuln': vuln,
         'user_status': user_status,
         'software_list': vuln.software.all().select_related('vendor'),
+        'risk_score': calculate_risk_score(vuln),
     }
     return render(request, 'core/vulnerability_detail.html', context)
 
@@ -138,27 +188,24 @@ def aging_report(request):
     user_vendors = profile.vendors.all()
     today = date.today()
 
-    # Get SLA settings from user profile
     sla_map = {
         'CRITICAL': profile.sla_critical,
         'HIGH': profile.sla_high,
         'MEDIUM': profile.sla_medium,
         'LOW': profile.sla_low,
-        'UNKNOWN': profile.sla_low,  # treat unknown same as low
+        'UNKNOWN': profile.sla_low,
     }
 
-    # Get all open vulnerabilities for user's vendors
     open_vulns = Vulnerability.objects.filter(
         software__vendor__in=user_vendors,
     ).distinct().exclude(
-        # exclude ones the user has already remediated or marked NA
         vulnerabilitystatus__profile=profile,
         vulnerabilitystatus__status__in=['REMEDIATED', 'NA']
     ).filter(
-        published_date__isnull=False  # must have a published date to calculate age
-    ).order_by('published_date')  # oldest first
+        published_date__isnull=False
+    ).order_by('published_date')
 
-    # Calculate age and SLA status for each vulnerability
+    # Build vuln data with calculated fields
     vuln_data = []
     overdue_count = 0
     within_sla_count = 0
@@ -180,9 +227,27 @@ def aging_report(request):
             'sla_target': sla_target,
             'days_remaining': days_remaining,
             'is_overdue': is_overdue,
-            'days_overdue': age_days - sla_target, # calcs days overdue
-            'risk_score': calculate_risk_score(vuln), # risk score
+            'days_overdue': age_days - sla_target,
+            'risk_score': calculate_risk_score(vuln),
         })
+
+    # Get sort parameters
+    sort, current_field, direction = get_sort_params(request, '-age_days')
+
+    # Sort vuln_data list in Python since all fields are calculated
+    sort_key_map = {
+        'cvss_score': lambda x: x['vuln'].cvss_score or 0,
+        'risk_score': lambda x: x['risk_score'],
+        'published_date': lambda x: x['vuln'].published_date,
+        'age_days': lambda x: x['age_days'],
+        'severity': lambda x: x['vuln'].severity,
+    }
+
+    if current_field in sort_key_map:
+        vuln_data.sort(
+            key=sort_key_map[current_field],
+            reverse=(direction == 'desc')
+        )
 
     # Pagination
     paginator = Paginator(vuln_data, 25)
@@ -196,6 +261,9 @@ def aging_report(request):
         'total_open': len(vuln_data),
         'sla_map': sla_map,
         'profile': profile,
+        'current_sort': sort,
+        'current_field': current_field,
+        'direction': direction,
     }
 
     return render(request, 'core/aging_report.html', context)
