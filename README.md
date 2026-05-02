@@ -26,7 +26,7 @@ Run Requirements.txt
 ```
 pip install -r requirements.txt
 ```
-Ran Migrations
+Run Migrations
 ```
 python manage.py migrate
 ```
