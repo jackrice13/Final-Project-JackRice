@@ -35,37 +35,37 @@ def logout_view(request): #basic logout
     return redirect('login')
 
 
-@login_required
-def vendor_selection(request): #vendor selector for user profile
-    profile = request.user.userprofile
-    all_vendors = Vendor.objects.all()
+# @login_required
+# def vendor_selection(request): #vendor selector, removed when integrated into profile page
+#     profile = request.user.userprofile
+#     all_vendors = Vendor.objects.all()
+#
+#     if request.method == 'POST':
+#         selected_vendors = request.POST.getlist('vendors')
+#         profile.vendors.set(selected_vendors)
+#         return redirect('dashboard')
+#
+#     return render(request, 'accounts/vendor_selection.html', {
+#         'all_vendors': all_vendors,
+#         'user_vendors': profile.vendors.all()
+#     })
 
-    if request.method == 'POST':
-        selected_vendors = request.POST.getlist('vendors')
-        profile.vendors.set(selected_vendors)
-        return redirect('dashboard')
 
-    return render(request, 'accounts/vendor_selection.html', {
-        'all_vendors': all_vendors,
-        'user_vendors': profile.vendors.all()
-    })
-@login_required
-@login_required
 @login_required
 def profile(request):
     profile = request.user.userprofile
     all_vendors = Vendor.objects.all()
 
     # Initialize all forms
-    user_form = UserUpdateForm(instance=request.user)
-    password_form = PasswordChangeForm(request.user)
-    vendor_form = VendorSelectionForm(
+    user_form = UserUpdateForm(instance=request.user) #user update widget for profile
+    password_form = PasswordChangeForm(request.user) #password widget for profile
+    vendor_form = VendorSelectionForm( #vendor widget for profile
         vendor_queryset=all_vendors,
-        initial={'vendors': profile.vendors.values_list('id', flat=True)}
+        initial={'vendors': profile.vendors.values_list('id', flat=True)} #passes vendors from database and pre-ticks currently selected ones.
     )
-    sla_form = SLASettingsForm(instance=profile)  # ← added here
+    sla_form = SLASettingsForm(instance=profile)  #SLA widget to profile
 
-    if request.method == 'POST':
+    if request.method == 'POST': #our separate forms but they all POST to the same URL. We distinguish which form was submitted using a hidden field
         action = request.POST.get('action')
 
         # Handle email update
