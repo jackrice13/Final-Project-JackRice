@@ -35,6 +35,15 @@ vulnerability data from all configured APIs automatically.
 - Username: `demo`
 - Password: `Demo1234!`
 
+### Optional: NVD API Key
+An NVD API key is not required but recommended for faster data fetching.
+Without a key the setup will still complete but may take longer.
+Get a free key at https://nvd.nist.gov/developers/request-an-api-key
+
+If you have a key add it to your .env file:
+```
+NVD_API_KEY=your-key-here
+```
 
 ### Executing program
  
