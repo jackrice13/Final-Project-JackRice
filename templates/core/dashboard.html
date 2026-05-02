@@ -200,8 +200,8 @@
     <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
             <li class="page-item">
-                <a class="page-link" 
-                   href="?page={{ page_obj.previous_page_number }}&severity={{ severity_filter }}&vendor={{ vendor_filter }}">
+                <a class="page-link"
+                   href="?page={{ page_obj.previous_page_number }}&severity={{ severity_filter }}&vendor={{ vendor_filter }}&kev={{ kev_filter }}&sort={{ current_sort }}">
                     Previous
                 </a>
             </li>
@@ -215,8 +215,8 @@
 
         {% if page_obj.has_next %}
             <li class="page-item">
-                <a class="page-link" 
-                   href="?page={{ page_obj.next_page_number }}&severity={{ severity_filter }}&vendor={{ vendor_filter }}">
+                <a class="page-link"
+                   href="?page={{ page_obj.next_page_number }}&severity={{ severity_filter }}&vendor={{ vendor_filter }}&kev={{ kev_filter }}&sort={{ current_sort }}">
                     Next
                 </a>
             </li>
