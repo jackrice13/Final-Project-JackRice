@@ -20,10 +20,22 @@ requests
 python-dotenv
  
 ### Installing
- 
-* How/where to download your program
-* Any modifications needed to be made to files/folders
- 
+#### Quick Setup (Recommended)
+
+After installing dependencies and running migrations, seed the entire 
+database in one command:
+
+```
+python manage.py setup_project
+```
+This will load vendor data, create a demo user account, and fetch 
+vulnerability data from all configured APIs automatically.
+
+**Demo login credentials:**
+- Username: `demo`
+- Password: `Demo1234!`
+
+
 ### Executing program
  
 Start the development server:
@@ -34,6 +46,15 @@ Open your browser and navigate to:
 ```
 http://127.0.0.1:8000
  ```
+## Logins
+SuperUser
+Username:admin
+password:Password01!
+
+**Demo login credentials:**
+- Username: `demo`
+- Password: `Demo1234!`
+
 ## Help
  
 Any advise for common problems or issues.

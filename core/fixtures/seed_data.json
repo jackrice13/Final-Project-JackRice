@@ -1,0 +1,55 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "username": "demo",
+      "password": "pbkdf2_sha256$1200000$NV0e7Cke75q2pnMrz3VTqK$nXomX54wmB2DF5gCx4yX/KsbPyzod9b/dZbF7Q623/g=",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "email": "demo@vulntracker.com",
+      "date_joined": "2026-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.vendor",
+    "pk": 1,
+    "fields": {
+      "name": "Microsoft",
+      "slug": "microsoft"
+    }
+  },
+  {
+    "model": "core.vendor",
+    "pk": 2,
+    "fields": {
+      "name": "Canonical",
+      "slug": "canonical"
+    }
+  },
+  {
+    "model": "core.vendor",
+    "pk": 3,
+    "fields": {
+      "name": "Red Hat",
+      "slug": "redhat"
+    }
+  },
+  {
+    "model": "core.vendor",
+    "pk": 4,
+    "fields": {
+      "name": "Debian",
+      "slug": "debian"
+    }
+  },
+  {
+    "model": "core.vendor",
+    "pk": 5,
+    "fields": {
+      "name": "Apache",
+      "slug": "apache"
+    }
+  }
+]
