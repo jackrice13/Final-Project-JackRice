@@ -35,20 +35,20 @@ def logout_view(request): #basic logout
     return redirect('login')
 
 
-# @login_required
-# def vendor_selection(request): #vendor selector, removed when integrated into profile page
-#     profile = request.user.userprofile
-#     all_vendors = Vendor.objects.all()
-#
-#     if request.method == 'POST':
-#         selected_vendors = request.POST.getlist('vendors')
-#         profile.vendors.set(selected_vendors)
-#         return redirect('dashboard')
-#
-#     return render(request, 'accounts/vendor_selection.html', {
-#         'all_vendors': all_vendors,
-#         'user_vendors': profile.vendors.all()
-#     })
+@login_required
+def vendor_selection(request): #vendor selector
+    profile = request.user.userprofile
+    all_vendors = Vendor.objects.all()
+
+    if request.method == 'POST':
+        selected_vendors = request.POST.getlist('vendors')
+        profile.vendors.set(selected_vendors)
+        return redirect('dashboard')
+
+    return render(request, 'accounts/vendor_selection.html', {
+        'all_vendors': all_vendors,
+        'user_vendors': profile.vendors.all()
+    })
 
 
 @login_required
