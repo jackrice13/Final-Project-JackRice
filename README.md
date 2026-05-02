@@ -47,9 +47,9 @@ Open your browser and navigate to:
 http://127.0.0.1:8000
  ```
 ## Logins
-SuperUser
-Username:admin
-password:Password01!
+**SuperUser login credentials:**
+-Username: 'admin'
+-Password: 'Password01!'
 
 **Demo login credentials:**
 - Username: `demo`
