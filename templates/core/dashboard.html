@@ -101,6 +101,7 @@
                 <th class="col-cve">CVE ID</th>
                 <th class="col-severity">Severity</th>
                 <th class="col-score">CVSS Score</th>
+                <th class="col-risk_score">Risk Score</th>
                 <th class="col-software">Vendor</th>
                 <th class="col-software">Software</th>
                 <th class="col-published">Published</th>
@@ -109,42 +110,39 @@
             </tr>
         </thead>
         <tbody>
-        {% for vuln in page_obj %}
+            {% for item in vuln_data %}
             <tr>
                 <td>
-                    <a href="{% url 'vulnerability_detail' vuln.cve_id %}" class="cve-link">
-                        {{ vuln.cve_id }}
+                    <a href="{% url 'vulnerability_detail' item.vuln.cve_id %}" class="cve-link">
+                        {{ item.vuln.cve_id }}
                     </a>
                 </td>
                 <td>
-                    <span class="severity-{{ vuln.severity|lower }}">
-                        {{ vuln.severity }}
+                    <span class="severity-{{ item.vuln.severity|lower }}">
+                        {{ item.vuln.severity }}
                     </span>
                 </td>
                 <td>
-                    {% if vuln.cvss_score %}
-                        <strong>{{ vuln.cvss_score }}</strong>
+                    {% if item.vuln.cvss_score %}
+                        <strong>{{ item.vuln.cvss_score }}</strong>
                     {% else %}
                         <span class="text-muted">N/A</span>
                     {% endif %}
                 </td>
-               <td class="col-software">
-                    <div class="software-badges">
-                        {% for software in vuln.software.all %}
-                            <span class="badge bg-light text-dark border me-1">
-                             {{ software.vendor.name }} <!--  {{ software.name }}-->
-                            </span>
-                        {% empty %}
-                            <span class="text-muted">—</span>
-                        {% endfor %}
-                    </div>
+                <td>
+                    {% if item.risk_score >= 13 %}
+                        <span class="badge bg-danger fw-bold">{{ item.risk_score }}</span>
+                    {% elif item.risk_score >= 10 %}
+                        <span class="badge bg-warning text-dark fw-bold">{{ item.risk_score }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary fw-bold">{{ item.risk_score }}</span>
+                    {% endif %}
                 </td>
-                </td>
-               <td class="col-software">
+                <td class="col-software">
                     <div class="software-badges">
-                        {% for software in vuln.software.all %}
+                        {% for software in item.vuln.software.all %}
                             <span class="badge bg-light text-dark border me-1">
-                              {{ software.name }}
+                                {{ software.vendor.name }} — {{ software.name }}
                             </span>
                         {% empty %}
                             <span class="text-muted">—</span>
@@ -152,22 +150,21 @@
                     </div>
                 </td>
                 <td>
-                    {% if vuln.published_date %}
-                        {{ vuln.published_date }}
+                    {% if item.vuln.published_date %}
+                        {{ item.vuln.published_date }}
                     {% else %}
                         <span class="text-muted">Unknown</span>
                     {% endif %}
                 </td>
-
                 <td>
-                    {% if vuln.in_cisa_kev %}
+                    {% if item.vuln.in_cisa_kev %}
                         <span class="kev-badge">⚠️ Active</span>
                     {% else %}
                         <span class="text-muted">—</span>
                     {% endif %}
                 </td>
                 <td>
-                    <a href="{% url 'vulnerability_detail' vuln.cve_id %}"
+                    <a href="{% url 'vulnerability_detail' item.vuln.cve_id %}"
                        class="btn btn-sm btn-outline-primary">
                         Details
                     </a>
@@ -175,9 +172,9 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" class="text-center py-4 text-muted">
-                    No vulnerabilities found. Try selecting vendors in your
-                    <a href="{% url 'profile' %}">Profile.</a>.
+                <td colspan="8" class="text-center py-4 text-muted">
+                    No vulnerabilities found. Try selecting vendors in
+                    <a href="{% url 'profile' %}">My Profile</a>.
                 </td>
             </tr>
             {% endfor %}

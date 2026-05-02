@@ -3,6 +3,27 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from core.models import Vulnerability, Vendor
 from accounts.models import VulnerabilityStatus
+from datetime import date
+
+def calculate_risk_score(vuln):
+    score = vuln.cvss_score or 0
+
+    # Base score = CVSS score(0 - 10)
+    # KEV bonus = +3 if actively exploited
+    # EOL bonus = +2 if any software is pastend of life Max possible = 15
+
+    # actively exploited vulnerabilities are higher priority
+    if vuln.in_cisa_kev:
+        score += 3
+
+    # if any affected software is past end of life, risk is higher
+    today = date.today()
+    for software in vuln.software.all():
+        if software.end_of_life_date and software.end_of_life_date < today:
+            score += 2
+            break  # only add the bonus once even if multiple EOL software
+
+    return round(score, 1)
 
 @login_required
 def dashboard(request):
@@ -39,6 +60,14 @@ def dashboard(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Calculate risk scores for current page only
+    vuln_data = []
+    for vuln in page_obj:
+        vuln_data.append({
+            'vuln': vuln,
+            'risk_score': calculate_risk_score(vuln),
+        })
+
     # Stats always based on full unfiltered queryset
     all_vulns = Vulnerability.objects.filter(
         software__vendor__in=user_vendors
@@ -49,6 +78,7 @@ def dashboard(request):
 
     context = {
         'page_obj': page_obj,
+        'vuln_data': vuln_data,
         'total_count': all_vulns.count(),
         'critical_count': all_vulns.filter(severity='CRITICAL').count(),
         'high_count': all_vulns.filter(severity='HIGH').count(),
@@ -150,7 +180,8 @@ def aging_report(request):
             'sla_target': sla_target,
             'days_remaining': days_remaining,
             'is_overdue': is_overdue,
-            'days_overdue': age_days - sla_target # calcs days overdue
+            'days_overdue': age_days - sla_target, # calcs days overdue
+            'risk_score': calculate_risk_score(vuln), # risk score
         })
 
     # Pagination

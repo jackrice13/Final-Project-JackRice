@@ -55,6 +55,7 @@
                 <th>CVE ID</th>
                 <th>Severity</th>
                 <th>CVSS</th>
+                <th>Risk Score</th>
                 <th>Published</th>
                 <th>Age (Days)</th>
                 <th>SLA Target</th>
@@ -83,6 +84,15 @@
                         <span class="text-muted">N/A</span>
                     {% endif %}
                 </td>
+                <td>
+                    {% if item.risk_score >= 13 %}
+                        <span class="badge bg-danger fw-bold">{{ item.risk_score }}</span>
+                    {% elif item.risk_score >= 10 %}
+                        <span class="badge bg-warning text-dark fw-bold">{{ item.risk_score }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary fw-bold">{{ item.risk_score }}</span>
+                    {% endif %}
+                </td>
                 <td>{{ item.vuln.published_date }}</td>
                 <td>
                     <strong>{{ item.age_days }}</strong> days
@@ -108,7 +118,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="8" class="text-center py-4 text-muted">
+                <td colspan="9" class="text-center py-4 text-muted">
                     No open vulnerabilities found.
                 </td>
             </tr>
