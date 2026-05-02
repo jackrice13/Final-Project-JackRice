@@ -6,7 +6,7 @@ from accounts.models import VulnerabilityStatus
 
 
 def calculate_risk_score(vuln):
-    score = vuln.cvss_score or 0
+    score = vuln.cvss_score or 0 # sets a default fault to prevent crash if no CVSS
 
     # Base score = CVSS score(0 - 10)
     # KEV bonus = +3 if actively exploited
@@ -14,18 +14,18 @@ def calculate_risk_score(vuln):
 
     # actively exploited vulnerabilities are higher priority
     if vuln.in_cisa_kev:
-        score += 3
+        score += 3 #adds + to  CVSS if found in KEV
 
     # if any affected software is past end of life, risk is higher
-    today = date.today()
+    today = date.today() #sets today as date
     for software in vuln.software.all():
-        if software.end_of_life_date and software.end_of_life_date < today:
+        if software.end_of_life_date and software.end_of_life_date < today: #checks if software is EOL by todays date
             score += 2
             break  # only add the bonus once even if multiple EOL software
 
-    return round(score, 1)
+    return round(score, 1) #rounds to nearest one to prevent display issues
 
-def get_sort_params(request, default='-cvss_score'):
+def get_sort_params(request, default='-cvss_score'): #helper function that reads and parses the sort parameter from the URL
     sort = request.GET.get('sort', default)
     # if sort starts with - it's descending, strip it to get the field name
     if sort.startswith('-'):
@@ -37,22 +37,22 @@ def get_sort_params(request, default='-cvss_score'):
     return sort, current_field, direction
 
 
-def get_next_sort(current_sort, field):
-    # if already sorting by this field, reverse direction
-    # otherwise sort descending by default
-    if current_sort == f'-{field}':
-        return field
-    return f'-{field}'
+# def get_next_sort(current_sort, field): #switche to java script, no longer used
+#     # if already sorting by this field, reverse direction
+#     # otherwise sort descending by default
+#     if current_sort == f'-{field}':
+#         return field
+#     return f'-{field}'
 
 @login_required
 def dashboard(request):
-    profile = request.user.userprofile
-    user_vendors = profile.vendors.all()
+    profile = request.user.userprofile #connect user to profile
+    user_vendors = profile.vendors.all() #gets vendors user is tracking
 
-    # Base queryset filtered by user's vendors
+    # core of filter by user's vendors
     vulnerabilities = Vulnerability.objects.filter(
-        software__vendor__in=user_vendors
-    ).distinct()
+        software__vendor__in=user_vendors #only include users vendors
+    ).distinct() #prevents dups
 
     # Get filter values from the URL
     severity_filter = request.GET.get('severity', '')
@@ -94,10 +94,10 @@ def dashboard(request):
         # default sort
         vulnerabilities = vulnerabilities.order_by('-cvss_score')
 
-    # Pagination - 25 per page
-    paginator = Paginator(vulnerabilities, 25)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    # Sets pages and options,
+    paginator = Paginator(vulnerabilities, 25) #25 per page
+    page_number = request.GET.get('page') #reads page number
+    page_obj = paginator.get_page(page_number) #returns correct page
 
     # Calculate risk scores for current page only
     vuln_data = []
@@ -111,7 +111,7 @@ def dashboard(request):
     # (can't do this at DB level since it's calculated)
     if current_field == 'risk_score':
         vuln_data.sort(
-            key=lambda x: x['risk_score'],
+            key=lambda x: x['risk_score'], # a lambda is an anonymous one line function. This one takes a dictionary x and returns its risk_score value. Python's sort() uses this to know what value to compare when sorting.
             reverse=(direction == 'desc')
         )
 
@@ -123,7 +123,7 @@ def dashboard(request):
     # Get user's remediation stats
     user_statuses = VulnerabilityStatus.objects.filter(profile=profile)
 
-    context = {
+    context = { #dictionary of everything passed to the template
         'page_obj': page_obj,
         'vuln_data': vuln_data,
         'total_count': all_vulns.count(),
@@ -145,12 +145,12 @@ def dashboard(request):
     return render(request, 'core/dashboard.html', context)
 
 @login_required
-def vulnerability_detail(request, cve_id):
-    vuln = get_object_or_404(Vulnerability, cve_id=cve_id)
+def vulnerability_detail(request, cve_id): #comes from the URL — defined in urls.py. from /vulnerability/CVE-2024-1234/ passes 'CVE-2024-1234' as cve_id
+    vuln = get_object_or_404(Vulnerability, cve_id=cve_id) #looks up the vulnerability by CVE ID. If it doesn't exist pop 404
 
     # Get user's status for this vulnerability if it exists
     user_status = None
-    try:
+    try: #find the user's status for this CVE or presents error
         user_status = VulnerabilityStatus.objects.get(
             profile=request.user.userprofile,
             vulnerability=vuln
@@ -166,19 +166,19 @@ def vulnerability_detail(request, cve_id):
     }
     return render(request, 'core/vulnerability_detail.html', context)
 
-@login_required
+@login_required #Remediate / Not Applicable / Reset buttons
 def update_status(request, cve_id):
-    if request.method == 'POST':
+    if request.method == 'POST': #processes if form was submitted
         vuln = get_object_or_404(Vulnerability, cve_id=cve_id)
-        status = request.POST.get('status')
+        status = request.POST.get('status') #reads which button was clicked. Each button has name="status" and a different value attribute
 
-        VulnerabilityStatus.objects.update_or_create(
+        VulnerabilityStatus.objects.update_or_create( #updates or creates to prevent duplciates
             profile=request.user.userprofile,
             vulnerability=vuln,
             defaults={'status': status}
         )
 
-    return redirect('vulnerability_detail', cve_id=cve_id)
+    return redirect('vulnerability_detail', cve_id=cve_id) #returns user back to details page
 
 from datetime import date
 
@@ -188,7 +188,7 @@ def aging_report(request):
     user_vendors = profile.vendors.all()
     today = date.today()
 
-    sla_map = {
+    sla_map = { #Builds a lookup dictionary from the user's SLA settings
         'CRITICAL': profile.sla_critical,
         'HIGH': profile.sla_high,
         'MEDIUM': profile.sla_medium,
@@ -196,14 +196,14 @@ def aging_report(request):
         'UNKNOWN': profile.sla_low,
     }
 
-    open_vulns = Vulnerability.objects.filter(
+    open_vulns = Vulnerability.objects.filter( #only the user's vendors, same as dashboard
         software__vendor__in=user_vendors,
-    ).distinct().exclude(
+    ).distinct().exclude( #removes anything the user has already marked as remediated or N/A
         vulnerabilitystatus__profile=profile,
         vulnerabilitystatus__status__in=['REMEDIATED', 'NA']
-    ).filter(
+    ).filter( #removes CVEs with no published date
         published_date__isnull=False
-    ).order_by('published_date')
+    ).order_by('published_date') #removes CVEs with no published date since we can't calculate age witho
 
     # Build vuln data with calculated fields
     vuln_data = []
@@ -211,12 +211,12 @@ def aging_report(request):
     within_sla_count = 0
 
     for vuln in open_vulns:
-        age_days = (today - vuln.published_date).days
-        sla_target = sla_map.get(vuln.severity, profile.sla_low)
-        days_remaining = sla_target - age_days
-        is_overdue = age_days > sla_target
+        age_days = (today - vuln.published_date).days #subtraction finds age
+        sla_target = sla_map.get(vuln.severity, profile.sla_low) #looks up the SLA target for this severity. profile.sla_low is failsafe
+        days_remaining = sla_target - age_days #positive means time left, negative means overdue
+        is_overdue = age_days > sla_target # True/False comparison
 
-        if is_overdue:
+        if is_overdue: # Counter for stats at top of page
             overdue_count += 1
         else:
             within_sla_count += 1
