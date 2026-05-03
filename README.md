@@ -77,7 +77,7 @@ python manage.py loaddata seed_data.json
 ```bash
 python manage.py fetch_nvd --days 30
 ```
-> ⚠️ This step may take several minutes depending on connection speed.
+> This step may take several minutes depending on connection speed.
 > An NVD API key is optional but will speed up this step significantly.
 
 ### 5. Fetch CISA KEV Actively Exploited Flags
