@@ -127,8 +127,8 @@ http://127.0.0.1:8000
 - Password: 'Password01!'
 
 **Demo login credentials:**
-- Username: `demo`
-- Password: `Demo1234!`
+- Username: demo
+- Password: Demo1234!
 
 ## Authors
  
