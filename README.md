@@ -144,5 +144,5 @@ Jack Rice
 * [CISA Known Exploited Vulnerabilities Catalog](https://www.cisa.gov/known-exploited-vulnerabilities-catalog)
 * [Microsoft Security Response Center API](https://api.msrc.microsoft.com/cvrf/v2.0)
 * [endoflife.date API](https://endoflife.date/docs/api)
-* [Django Documentation](https://docs.djangoproject.com/)
+* [Django ](https://docs.djangoproject.com/)
 * [Bootstrap 5](https://getbootstrap.com/)
