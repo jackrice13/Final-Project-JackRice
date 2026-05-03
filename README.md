@@ -20,7 +20,7 @@ requests
 python-dotenv
  
 ### Installing
-#### Quick Setup (Recommended)
+## Quick Setup (Recommended)
 
 Run Requirements.txt
 ```
