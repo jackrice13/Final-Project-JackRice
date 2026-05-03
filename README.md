@@ -54,6 +54,63 @@ If you have a key add it to your .env file:
 NVD_API_KEY=your-key-here
 ```
 
+## Manual Setup (If setup_project Fails)
+
+If the automated setup script fails, you can run each step manually in order.
+
+### 1. Apply Database Migrations
+```bash
+python manage.py migrate
+```
+
+### 2. Create a Superuser Account
+```bash
+python manage.py createsuperuser
+```
+
+### 3. Load Vendor Fixture Data
+```bash
+python manage.py loaddata seed_data.json
+```
+
+### 4. Fetch NVD Vulnerability Data
+```bash
+python manage.py fetch_nvd --days 30
+```
+> ⚠️ This step may take several minutes depending on connection speed.
+> An NVD API key is optional but will speed up this step significantly.
+
+### 5. Fetch CISA KEV Actively Exploited Flags
+```bash
+python manage.py fetch_kev
+```
+
+### 6. Fetch Microsoft MSRC Product Data
+```bash
+python manage.py fetch_msrc --months 3
+```
+
+### 7. Fetch Software End of Life Dates
+```bash
+python manage.py fetch_eol
+```
+
+### 8. Start the Development Server
+```bash
+python manage.py runserver
+```
+
+### 9. Create a Demo User (Optional)
+Visit `http://127.0.0.1:8000/accounts/register/` and register a new 
+account. After logging in, visit **My Profile** and select **Microsoft** 
+as a tracked vendor to populate your dashboard with data.
+
+---
+
+> **Note:** All fetch commands (steps 4-7) require an active internet 
+> connection. If any command fails it can be safely re-run without 
+> creating duplicate database entries.
+
 ### Executing program
  
 Start the development server:
