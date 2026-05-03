@@ -130,13 +130,6 @@ http://127.0.0.1:8000
 - Username: `demo`
 - Password: `Demo1234!`
 
-## Help
- 
-Any advise for common problems or issues.
-```
-command to run if program contains helper info
-```
- 
 ## Authors
  
 Jack Rice
