@@ -146,3 +146,4 @@ Jack Rice
 * [endoflife.date API](https://endoflife.date/docs/api)
 * [Django ](https://docs.djangoproject.com/)
 * [Bootstrap 5](https://getbootstrap.com/)
+* [Claude AI](https://claude.ai/)
